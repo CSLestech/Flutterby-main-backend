@@ -59,7 +59,7 @@ mini_identifier_model.to(device)
 mini_identifier_model.eval()
 
 # === 4. Load SVM Model ===
-svm_model = joblib.load("svm_model_20250420_102634.pkl")
+svm_model = joblib.load("svm_model_20250427_194931.pkl")
 
 # === 5. Load DeiT Feature Extractor ===
 deit = timm.create_model('deit_tiny_distilled_patch16_224', pretrained=True)
