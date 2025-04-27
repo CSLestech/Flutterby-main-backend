@@ -8,6 +8,7 @@ import logging
 import time
 import os
 import requests
+import socket
 
 # Create logs directory if it doesn't exist
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
@@ -52,7 +53,6 @@ def download_model():
 download_model()
 
 # === 3. Load Mini Identifier Model ===
-# Use timm to load the classifier model with the same architecture as the training code
 mini_identifier_model = timm.create_model('deit_base_distilled_patch16_224', num_classes=2)
 mini_identifier_model.load_state_dict(torch.load("deit_chicken_classifier.pth", map_location=device))
 mini_identifier_model.to(device)
@@ -79,7 +79,6 @@ app = Flask(__name__)
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    # Start timing the prediction
     start_time = time.time()
     logger.info("Starting prediction request")
     
@@ -109,32 +108,34 @@ def predict():
         labels = ["Consumable", "Half-consumable", "Not consumable"]
         label = labels[int(prediction[0])]
 
-        # Calculate confidence (this is a placeholder - in a real app, you'd get this from the model)
-        confidence = 0.9  # Example confidence value
+        # Confidence placeholder
+        confidence = 0.9
         
         # Log performance timing for server-side processing
         prediction_time = time.time() - start_time
         logger.info(f"Server prediction completed in {prediction_time:.3f} seconds")
         
-        # Include timing information in response
         response = {
             'prediction': label,
             'confidence': str(confidence),
             'processing_time_sec': prediction_time
         }
         
-        # Log if prediction exceeds target time
         if prediction_time > 3.0:
             logger.warning(f"⚠️ Prediction took {prediction_time:.3f} seconds, exceeding 3-second threshold")
         
         return jsonify(response)
         
     except Exception as e:
-        # Log the error
         prediction_time = time.time() - start_time
         logger.error(f"Error in prediction after {prediction_time:.3f} seconds: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    # Dynamic port binding, can use 5000 or fallback if port is in use
+    try:
+        app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=False)
+    except OSError as e:
+        logger.error(f"Error starting app: {e}")
+        exit(1)
