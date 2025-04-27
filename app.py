@@ -53,7 +53,7 @@ def download_model():
 download_model()
 
 # === 3. Load Mini Identifier Model ===
-mini_identifier_model = timm.create_model('deit_base_distilled_patch16_224', num_classes=2)
+mini_identifier_model = timm.create_model('deit_tiny_distilled_patch16_224', num_classes=2)
 mini_identifier_model.load_state_dict(torch.load("deit_chicken_classifier.pth", map_location=device))
 mini_identifier_model.to(device)
 mini_identifier_model.eval()
@@ -62,7 +62,7 @@ mini_identifier_model.eval()
 svm_model = joblib.load("svm_model_20250420_102634.pkl")
 
 # === 5. Load DeiT Feature Extractor ===
-deit = timm.create_model('deit_base_distilled_patch16_224', pretrained=True)
+deit = timm.create_model('deit_tiny_distilled_patch16_224', pretrained=True)
 deit.reset_classifier(0)  # Remove the classification head
 deit.eval()
 deit.to(device)
