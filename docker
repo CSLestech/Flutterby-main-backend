@@ -1,0 +1,27 @@
+# Step 1: Use Python Alpine image as a parent image - typically has fewer vulnerabilities
+FROM python:3.12-alpine
+
+# Step 2: Set the working directory in the container
+WORKDIR /app
+
+# Step 3: Copy the requirements file first for better caching
+COPY requirements.txt .
+
+# Step 4: Install dependencies
+# Add build dependencies for compiling Python packages if needed
+RUN apk add --no-cache --virtual .build-deps gcc musl-dev && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apk del .build-deps
+
+# Step 5: Copy the application code after installing dependencies
+COPY . .
+
+# Step 6: Expose port 5000 for the Flask app
+EXPOSE 5000
+
+# Step 7: Set environment variables for Flask
+ENV FLASK_APP=app.py
+ENV FLASK_RUN_HOST=0.0.0.0
+
+# Step 8: Run the Flask app when the container starts
+CMD ["flask", "run"]
