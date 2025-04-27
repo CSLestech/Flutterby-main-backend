@@ -32,25 +32,25 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 logger.info(f"Using device: {device}")
 
 # === 2. Download the Model if Not Present ===
-def download_model():
-    model_url = "https://github.com/CSLestech/Flutterby-main-backend/releases/download/deit/deit_chicken_classifier.pth"  # Replace with your actual URL
-    model_path = "deit_chicken_classifier.pth"  # Path where the model will be saved
+#def download_model():
+    #model_url = "https://github.com/CSLestech/Flutterby-main-backend/releases/download/deit/deit_chicken_classifier.pth"  # Replace with your actual URL
+    #model_path = "deit_chicken_classifier.pth"  # Path where the model will be saved
 
-    if not os.path.exists(model_path):
-        logger.info(f"Downloading model from {model_url}...")
-        try:
-            response = requests.get(model_url)
-            with open(model_path, "wb") as file:
-                file.write(response.content)
-            logger.info("Model downloaded successfully!")
-        except Exception as e:
-            logger.error(f"Failed to download model: {str(e)}")
-            raise RuntimeError(f"Failed to download model: {str(e)}")
-    else:
-        logger.info("Model already exists, skipping download.")
+    #if not os.path.exists(model_path):
+     #   logger.info(f"Downloading model from {model_url}...")
+      #  try:
+          #  response = requests.get(model_url)
+           # with open(model_path, "wb") as file:
+           #     file.write(response.content)
+      #      logger.info("Model downloaded successfully!")
+      #  except Exception as e:
+      #      logger.error(f"Failed to download model: {str(e)}")
+      #      raise RuntimeError(f"Failed to download model: {str(e)}")
+   # else:
+     #   logger.info("Model already exists, skipping download.")
 
 # Call the function to download the model
-download_model()
+#download_model()
 
 # === 3. Load Mini Identifier Model ===
 mini_identifier_model = timm.create_model('deit_tiny_distilled_patch16_224', num_classes=2)
