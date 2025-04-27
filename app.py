@@ -7,6 +7,7 @@ import timm
 import logging
 import time
 import os
+import requests
 
 # Create logs directory if it doesn't exist
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
@@ -29,30 +30,51 @@ logger.info(f"Logging to: {log_file}")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 logger.info(f"Using device: {device}")
 
-# === 2. Load Mini Identifier Model ===
+# === 2. Download the Model if Not Present ===
+def download_model():
+    model_url = "https://github.com/CSLestech/Flutterby-main-backend/releases/download/deit/deit_chicken_classifier.pth"  # Replace with your actual URL
+    model_path = "deit_chicken_classifier.pth"  # Path where the model will be saved
+
+    if not os.path.exists(model_path):
+        logger.info(f"Downloading model from {model_url}...")
+        try:
+            response = requests.get(model_url)
+            with open(model_path, "wb") as file:
+                file.write(response.content)
+            logger.info("Model downloaded successfully!")
+        except Exception as e:
+            logger.error(f"Failed to download model: {str(e)}")
+            raise RuntimeError(f"Failed to download model: {str(e)}")
+    else:
+        logger.info("Model already exists, skipping download.")
+
+# Call the function to download the model
+download_model()
+
+# === 3. Load Mini Identifier Model ===
 # Use timm to load the classifier model with the same architecture as the training code
 mini_identifier_model = timm.create_model('deit_base_distilled_patch16_224', num_classes=2)
 mini_identifier_model.load_state_dict(torch.load("deit_chicken_classifier.pth", map_location=device))
 mini_identifier_model.to(device)
 mini_identifier_model.eval()
 
-# === 3. Load SVM Model ===
+# === 4. Load SVM Model ===
 svm_model = joblib.load("svm_model_20250420_102634.pkl")
 
-# === 4. Load DeiT Feature Extractor ===
+# === 5. Load DeiT Feature Extractor ===
 deit = timm.create_model('deit_base_distilled_patch16_224', pretrained=True)
 deit.reset_classifier(0)  # Remove the classification head
 deit.eval()
 deit.to(device)
 
-# === 5. Transform ===
+# === 6. Transform ===
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
 ])
 
-# === 6. Flask App ===
+# === 7. Flask App ===
 app = Flask(__name__)
 
 @app.route('/predict', methods=['POST'])
@@ -86,7 +108,7 @@ def predict():
         prediction = svm_model.predict(feature_vector)
         labels = ["Consumable", "Half-consumable", "Not consumable"]
         label = labels[int(prediction[0])]
-        
+
         # Calculate confidence (this is a placeholder - in a real app, you'd get this from the model)
         confidence = 0.9  # Example confidence value
         
