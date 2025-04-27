@@ -54,7 +54,7 @@ logger.info(f"Using device: {device}")
 
 # === 3. Load Mini Identifier Model ===
 mini_identifier_model = timm.create_model('deit_tiny_distilled_patch16_224', num_classes=2)
-mini_identifier_model.load_state_dict(torch.load("deit_chicken_classifier.pth", map_location=device))
+mini_identifier_model.load_state_dict(torch.load("deit_tiny_chicken_classifier.pth", map_location=device))
 mini_identifier_model.to(device)
 mini_identifier_model.eval()
 
